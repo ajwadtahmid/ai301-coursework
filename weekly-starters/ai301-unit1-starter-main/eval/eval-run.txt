@@ -1,0 +1,53 @@
+# eval run written by run_eval.py at 2026-09-22T15:12:14Z
+# model: sonnet (pinned)
+# graded: /home/ajwad/.claude/skills/issue-select
+# packages: 20 scored
+#   rubric.md  sha256:e8152c51bb25149e
+#   SKILL.md  sha256:bbb295bf984701fd
+#
+grading 20 bundle(s) with rubric.md, model sonnet, 5 worker(s)...
+  issue-04: reject
+  issue-02: reject
+  issue-01: accept
+  issue-03: reject
+  issue-06: accept
+  issue-05: reject
+  issue-07: reject
+  issue-08: reject
+  issue-10: reject
+  issue-09: accept
+  issue-12: reject
+  issue-14: accept
+  issue-13: reject
+  issue-11: reject
+  issue-16: accept
+  issue-17: reject
+  issue-15: accept
+  issue-18: reject
+  issue-19: accept
+  issue-20: accept
+
+item      gold    verdict  agree  note
+issue-01  accept  accept   yes    
+issue-02  reject  reject   yes    
+issue-03  reject  reject   yes    
+issue-04  accept  reject   NO     failed: Scope is bounded
+issue-05  reject  reject   yes    
+issue-06  accept  accept   yes    
+issue-07  reject  reject   yes    
+issue-08  reject  reject   yes    
+issue-09  accept  accept   yes    
+issue-10  reject  reject   yes    
+issue-11  accept  reject   NO     failed: Scope is bounded, Has first-issue label (preferred)
+issue-12  reject  reject   yes    
+issue-13  reject  reject   yes    
+issue-14  accept  accept   yes    
+issue-15  reject  accept   NO     graded accept
+issue-16  accept  accept   yes    
+issue-17  reject  reject   yes    
+issue-18  reject  reject   yes    
+issue-19  accept  accept   yes    
+issue-20  reject  accept   NO     graded accept
+
+categories: claimed 4/4  clear-accept 6/8  dead-repo 3/3  policy 1/1  scope 2/4
+agreement: 16/20 scored items  (bar: 18/20: below the bar)

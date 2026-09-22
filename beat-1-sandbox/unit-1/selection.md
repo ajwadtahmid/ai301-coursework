@@ -15,22 +15,30 @@ wrong label is not graded.
 
 **Issue link**
 
-[The individual Path Review issue page. A link to the repository or the issue list
-does not satisfy this field.]
+https://github.com/conda/conda/issues/16475
 
 **Verdict output**
 
-[Your skill's live-mode output for this issue, pasted verbatim and ending with the
-fenced JSON verdict block. A summary does not satisfy this field.]
+Repo is maintained (active, commits within 6 months) ✓
+Maintainer is present (recent releases and commits) ✓
+Not claimed (no assignee, no linked PRs) ✓
+Scope is bounded (docs task with clear requirements) ✓
+No AI policy barrier (conda welcomes AI-assisted contributions) ✓
+Has first-issue label (type::documentation) ✓
 
-**The verdict must record `accept` for this issue.** Choose an issue your own skill
-accepts. If your skill rejects every candidate you try, that is a signal about your
-rubric rather than about the issues: revise it and re-run — retries are unlimited and a
-partial re-run costs about $0.20 — or run the skill on different candidates. Output
-recording `reject` for the issue you chose earns no credit for this field.
-
-```
-paste the output here, including the closing JSON block
+```json
+{
+  "item": "conda/conda#16475",
+  "checks": [
+    {"name": "Repo is maintained", "grade": "pass", "evidence": "Last push 2026-08-04, latest release 2026-07-31"},
+    {"name": "Maintainer is present", "grade": "pass", "evidence": "Multiple commits within past month"},
+    {"name": "Not claimed", "grade": "pass", "evidence": "No assignee, no linked PRs"},
+    {"name": "Scope is bounded", "grade": "pass", "evidence": "Documentation task with clear scope: add docs for PyPI packages with conda install"},
+    {"name": "No AI policy barrier", "grade": "pass", "evidence": "CONTRIBUTING.md welcomes AI tools if contributor understands changes"},
+    {"name": "Has first-issue label", "grade": "pass", "evidence": "Labeled type::documentation"}
+  ],
+  "verdict": "accept"
+}
 ```
 
 ---
@@ -41,27 +49,21 @@ Quote source text directly in each field below. Paraphrase does not satisfy them
 
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+14/15 (calibration run), 17/20, 18/20 (final submitted run). The last score of 18/20 matches the `eval-run.txt` agreement line.
 
 **Issue analysis**
 
-[One scored issue, identified by id (`issue-01` through `issue-20`; the `calib-`
-issues are not scored). State your rubric's decision, the gold label, and the
-reasoning that produced your rubric's result.]
+Issue-15 (zulip/zulip#19589). Gold label: reject. My rubric: accept. Reason: The issue is a "Separate `command` and `text` field for slack-compatible outgoing webhook" feature with 97 comments and 2 closed/abandoned PRs showing repeated implementation attempts. My "Scope is bounded" check failed to detect this complexity flag because the check wording focuses on "multiple abandoned/closed linked PRs" but doesn't catch the comment volume as a signal of unresolved design debate. The gold label correctly rejected it: "years of design debate and two abandoned PRs behind a friendly label."
 
 **Check rationale**
 
-[One check from the `rubric.md` uploaded to `tools/issue-select/`, quoted as it is
-currently written, with the reasoning behind its current form.]
+From rubric.md: "Scope is bounded: Not labeled as megaissue/epic/tracking; has clear reproduction steps or stated requirements; does not have multiple abandoned/closed linked PRs showing scope creep"
+
+This check catches megaissues and feature requests lacking clear scope, and detects when multiple implementation attempts have failed. The reasoning: a first contributor should get a bounded task with clear acceptance criteria, not one requiring design decisions or involving years of discussion.
 
 **Trade-offs**
 
-[What the quoted check gives up. Any one of these is a complete answer: an issue whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+The check rejects issue-15 correctly in principle but missed that it should also flag issues with extensive unresolved discussion (97 comments). Issues-04, 11, 19 are simpler tasks (bug fixes with few comments, bounded scope) that passed correctly. The trade-off: the check lets straightforward bugs through but doesn't distinguish between "10 comments of discussion" and "97 comments of design debate." Could improve by checking comment count or explicit "design discussion needed" keywords.
 
 ---
 
@@ -73,12 +75,11 @@ This is also the basis for the claim comment you write in Unit 2.
 
 **Selection rationale**
 
-[Answer all three:
+1. **Fit to interests and time**: This issue is adding documentation for a stable conda feature (installing PyPI packages with `conda install`). It's pure documentation work without code changes, giving scope to learn the docs structure and workflow. The task has clear requirements listed, so implementation is straightforward and time-bounded.
 
-1. The issue's fit to your interests and to the time available.
-2. What the verdict identified correctly, and what you weighed that the rubric could
-   not.
-3. The anticipated difficulty in claiming it.]
+2. **What the verdict got right and what I weighed differently**: The rubric correctly identified this as a good first issue—active repo, responsive maintainers, clear scope, no claims. I weighted the fact that it's purely documentation (lower risk than code bugs), and the contributor notes show exactly what files to change and what content to add. A newcomer can make meaningful progress without deep domain knowledge.
+
+3. **Anticipated difficulty in claiming it**: Low-to-medium. The task is well-scoped and documented. Main challenges: learning the conda docs structure (Sphinx/RST format), understanding the exact guidance needed for PyPI package installation, and getting the PR reviewed. The maintainers seem responsive, so the review should be constructive.
 
 ---
 
