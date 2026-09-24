@@ -1,0 +1,23 @@
+{
+  "id": "calib-04",
+  "calibration": true,
+  "source": "sharkdp/hyperfine#920",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: sharkdp/hyperfine (28666 stars, archived: no)\n- description: A command-line benchmarking tool.\n- latest release: v1.20.0 (2025-11-18)\n- bug reports: no structured template; reports are expected to describe the problem and how to reproduce it\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "panic: integer overflow in `--parameter-scan` near i32::MAX",
+    "number": 920,
+    "author": "nikolauspschuetz",
+    "author_association": "NONE",
+    "opened": "2026-08-14",
+    "state": "open",
+    "labels": [],
+    "body_markdown": "`--parameter-scan` panics with an integer overflow when the range ends\nat (or one step below) `i32::MAX`. Minimal reproduction:\n\n```\nhyperfine --parameter-scan x 2147483646 2147483647 'true'\n```\n\nDebug/test builds panic with `attempt to add with overflow`; release\nbuilds wrap from `i32::MAX` to `i32::MIN` instead of panicking, so the\niterator keeps going and hyperfine tries to generate about 4 billion\ncommands (effectively a hang / OOM).\n\nCause (from the reporter): min/max parse as `i32`, the `MAX_PARAMETERS`\ncap is only enforced at construction via `size_hint`, and the range\niterator's `next()` does an unconditional `state += step`, which\noverflows on the final element. Expected: the scan yields the in-range\nvalues and stops, wherever the range sits in the `i32` domain. The\nreporter says they have a small fix plus regression test ready."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "Hi, I'd like to verify and follow this overflow issue as a first\ncontribution here. I've reproduced the panic with the issue's exact\ncommand (report below). Since the reporter already has a fix ready,\nI'll offer independent testing of that PR across build profiles first.",
+  "repro_report_markdown": "Ran the issue's minimal reproduction exactly as given:\n\n```\n$ hyperfine --parameter-scan x 2147483646 2147483647 'true'\nBenchmark 1: true\nthread 'main' panicked at src/parameter/range_step.rs:66:9:\nattempt to add with overflow\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n```\n\nA control run of the same scan shifted away from the boundary\ncompletes normally:\n\n```\n$ hyperfine --parameter-scan x 1 2 'true'\nBenchmark 1: true\n  Time (mean +- sd):     1.1 ms +-   0.2 ms\nBenchmark 2: true\n  Time (mean +- sd):     1.1 ms +-   0.2 ms\n```\n\nExpected: the boundary scan behaves like the control, benchmarking the\ntwo in-range values and exiting cleanly.\n\nActual: the panic shown above, on the final element of the range,\nmatching the issue's description of the debug-build behavior."
+}

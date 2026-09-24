@@ -1,0 +1,42 @@
+{
+  "id": "pkg-14",
+  "calibration": false,
+  "source": "zellij-org/zellij#5451",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: zellij-org/zellij (34963 stars, archived: no)\n- description: A terminal workspace with batteries included.\n- latest release: v0.44.3 (2026-05-13)\n- bug reports: template asks for an issue description, a minimal reproduction, and other relevant information (zellij version, terminal, OS)\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "Multi-tab startup layout: one pane never renders and permanently ignores input (Windows)",
+    "number": 5451,
+    "author": "amir-arad",
+    "author_association": "CONTRIBUTOR",
+    "opened": "2026-08-07",
+    "state": "open",
+    "labels": [],
+    "body_markdown": "Creating a session from a layout with 3 tabs leaves one terminal pane\npermanently blank: no prompt, and it ignores all input. The spawned\nshell process is alive and idle, so this is a pane setup/render failure\nrather than a shell one. It is a race: the victim is never the first\ntab, and which tab dies varies between runs, so a single passing run\ndoes not disprove it.\n\nThe debug log for the affected tab stops dead after\n`ApplyLayout: sending QueryTerminalSize to client 1`, with no further\nlog activity for the life of the session. Minimal reproduction: a KDL\nlayout with 3 tabs (tab-bar, a terminal pane with a distinct `cwd`,\nstatus-bar each), `zellij -n <layout>`, wait, then\n`action dump-screen -p terminal_N` for each pane; one comes back empty.\nMeasured: 3/3 failed via startup layout, 4/4 clean via `action new-tab`\nafter startup, 3/3 clean with `zsh -f` (no rc files). No recovery from\nkeystrokes, tab switch, window resize, or client reconnect.\n\nEnvironment: zellij 0.44.3, Windows 10.0.26200.8973, Alacritty."
+  },
+  "comments_total": 4,
+  "thread_highlights": [
+    {
+      "date": "2026-08-07",
+      "author": "amir-arad",
+      "author_association": "CONTRIBUTOR",
+      "summary_markdown": "full debug log from a fresh reproduction; terminal_2 blank and unresponsive, the log is 23 meaningful lines then 86 identical unhandled-event lines"
+    },
+    {
+      "date": "2026-08-11",
+      "author": "divens",
+      "author_association": "CONTRIBUTOR",
+      "summary_markdown": "thanks for the report, will look into it"
+    },
+    {
+      "date": "2026-08-14",
+      "author": "s-annam",
+      "author_association": "NONE",
+      "summary_markdown": "what looks like the same bug on macOS + Ghostty, on interactive `new-tab` in a long-running session, so probably not Windows-specific"
+    }
+  ],
+  "claim_comment_markdown": "Hello! I'd like to take this startup-layout race as my first zellij\ncontribution. I have reproduced the dead pane on my machine (evidence\nbelow) and I'm ready to start bisecting the layout-apply path.",
+  "repro_report_markdown": "I set up the reproduction environment and confirmed everything is in\nplace. Evidence of my setup:\n\n```\n$ zellij --version\nzellij 0.44.3\n$ zellij ls\nlayout-test [Created 2m ago]\n```\n\nI created the 3-tab layout file from the issue and started a session\nwith it, and the session launches with all three tabs showing in the\ntab bar, so the layout is definitely being applied the way the issue\ndescribes. The screenshot I took shows the zellij session running with\nthe three tabs visible.\n\nEnvironment: zellij 0.44.3 (cargo install), Windows 11 (10.0.26100),\nWindows Terminal 1.24.\n\nExpected: one of the three panes comes up blank and ignores input.\n\nActual: the session starts and the tabs are all present, consistent\nwith the issue's setup. This confirms the bug report's scenario is\nreproducible on my machine and I am ready to investigate the race."
+}

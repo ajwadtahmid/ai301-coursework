@@ -1,0 +1,49 @@
+{
+  "id": "pkg-06",
+  "calibration": false,
+  "source": "kubernetes/minikube#11645",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: kubernetes/minikube (32039 stars, archived: no)\n- description: Run Kubernetes locally.\n- latest release: v1.38.1 (2026-02-19)\n- bug reports: template asks what happened, the exact command to reproduce, the full output of the failed command, the output of `minikube logs`, the operating system, and the driver\n- contribution policy (CONTRIBUTING.md): standard Kubernetes-project contribution guide (CLA, DCO); no stated AI policy"
+  },
+  "issue": {
+    "title": "Minikube tunnel is not working on Windows (endessly trying to add a route)",
+    "number": 11645,
+    "author": "sm4sh1k",
+    "author_association": "NONE",
+    "opened": "2021-06-13",
+    "state": "open",
+    "labels": [
+      "kind/bug",
+      "help wanted",
+      "priority/important-longterm",
+      "lifecycle/frozen",
+      "good first issue",
+      "area/tunnel"
+    ],
+    "body_markdown": "Minikube tunnel is not working on Windows because minikube can not recognize the correct answer (or status code) of the **route** command.\n\nSteps to reproduce the issue:\n\n1. `minikube start --driver vmware`\n2. `minikube tunnel --cleanup --alsologtostderr`\n\nThe full output shows the tunnel loop repeatedly logging `About to run cmd: route ... ADD` and retrying: minikube keeps re-adding the same route because it misreads the Windows `route` command's output, so the tunnel never settles."
+  },
+  "comments_total": 15,
+  "thread_highlights": [
+    {
+      "date": "2021-07-18",
+      "author": "joseluisgomes",
+      "author_association": "NONE",
+      "summary_markdown": "currently has the same problem"
+    },
+    {
+      "date": "2021-09-09",
+      "author": "ziemerz",
+      "author_association": "NONE",
+      "summary_markdown": "facing similar issues on Mac with the hyperkit driver"
+    },
+    {
+      "date": "2021-10-08",
+      "author": "Nirvandil",
+      "author_association": "NONE",
+      "summary_markdown": "same with the VirtualBox backend"
+    }
+  ],
+  "claim_comment_markdown": "I'd like to work on this tunnel issue as my first contribution here. I have it reproducing locally (report below) and plan to look at how the tunnel manager parses the `route` command's output on Windows.",
+  "repro_report_markdown": "Reproduced the endless route-add loop. Steps:\n\n1. `minikube start`\n2. `minikube tunnel --alsologtostderr`\n3. Watch the log output loop.\n\nOutput excerpt from step 2:\n\n```\nI0812 14:03:11.402181    9184 out.go:296] Setting JSON to false\nI0812 14:03:14.117290    9184 tunnel.go:58] Checking for tunnels to cleanup...\nI0812 14:03:14.883104    9184 loadbalancer_patcher.go:80] Patched svc/hello-node with an external IP\nI0812 14:03:15.021447    9184 route.go:118] About to run cmd: route ADD 10.96.0.0 MASK 255.240.0.0 192.168.59.101\nI0812 14:03:16.339812    9184 route.go:130] error adding route: exit status 1, retrying\nI0812 14:03:17.481533    9184 route.go:118] About to run cmd: route ADD 10.96.0.0 MASK 255.240.0.0 192.168.59.101\nI0812 14:03:18.612204    9184 route.go:130] error adding route: exit status 1, retrying\nI0812 14:03:19.744981    9184 route.go:118] About to run cmd: route ADD 10.96.0.0 MASK 255.240.0.0 192.168.59.101\n```\n\nExpected: the route is added once and `minikube tunnel` reports the tunnel as running.\n\nActual: the same `route ADD` line repeats indefinitely with `error adding route: exit status 1, retrying` between repetitions, as shown above, and the tunnel never becomes ready."
+}

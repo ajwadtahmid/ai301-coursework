@@ -1,0 +1,25 @@
+{
+  "id": "calib-02",
+  "calibration": true,
+  "source": "laurent22/joplin#16196",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: laurent22/joplin (55975 stars, archived: no)\n- description: Joplin, the privacy-focused note taking app with sync capabilities for Windows, macOS, Linux, Android and iOS.\n- latest release: v3.6.15 (2026-06-20)\n- bug reports: template asks for the operating system, the Joplin version, desktop version info, current behavior, expected behavior, and logs\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "editor window disappears if search doesn't find the search string",
+    "number": 16196,
+    "author": "sphynxnz256",
+    "author_association": "NONE",
+    "opened": "2026-08-12",
+    "state": "open",
+    "labels": [
+      "bug"
+    ],
+    "body_markdown": "Operating system: Windows. Joplin version: 3.6.15.\n\nWhen you type something into the search bar, if the thing you type is\nnot found, the editor window closes until you clear the search bar or\nsearch for text that does exist. The reporter believes the search is\nreturning a null result Joplin does not know how to handle, points at\nlaurent22/joplin#15147 as an earlier report of the same behavior that\nwas closed unfixed, and offers to attempt a fix."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "+1!! this happens to me constantly and it drives me nuts 😩 search is\nbasically broken, can't believe this has been around since the other\nissue and never got fixed. claiming this one, someone has to do it 🙏",
+  "repro_report_markdown": "Same here!! The editor totally disappears whenever my search comes up\nempty, exactly like the issue says. It happens all the time, every\nsingle day, on all my machines. Everyone I know who uses Joplin has\nthis problem too, so it is definitely not just me. It is obviously the\nnull result thing the reporter mentioned, that part of the code has\nalways been flaky. This is a huge usability problem and honestly\nshould be the top priority for the next release. Please fix it soon,\nthe app is unusable for heavy search users like me!"
+}

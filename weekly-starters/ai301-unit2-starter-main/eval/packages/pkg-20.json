@@ -1,0 +1,26 @@
+{
+  "id": "pkg-20",
+  "calibration": false,
+  "source": "ghostty-org/ghostty#13604",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: ghostty-org/ghostty (59782 stars, archived: no)\n- description: Ghostty is a fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration.\n- latest release: v1.3.1\n- bug reports: template asks for the ghostty version, configuration, and platform details; first-time contributors go through a vouch flow before PRs are accepted\n- contribution policy (CONTRIBUTING.md + AI_POLICY.md): strict AI rules. All AI usage in any form must be disclosed, stating the tool used and the extent of the assistance; the human in the loop must fully understand the work; AI-assisted issues and comments must be reviewed and edited by a human before submission"
+  },
+  "issue": {
+    "title": "Mode 2031 reports do not work unless both a dark and a light theme are configured",
+    "number": 13604,
+    "author": "jcollie",
+    "author_association": "MEMBER",
+    "opened": "2026-08-04",
+    "state": "open",
+    "labels": [
+      "vt",
+      "gtk"
+    ],
+    "body_markdown": "With an isolated Ghostty instance launched with\n`--config-default-files=false --window-theme=dark`, Ghostty's GTK log\ncorrectly reports `style manager changed scheme=.dark`, but querying\nthe current color scheme with `CSI ? 996 n` returns `CSI ? 997 ; 2 n`,\nwhich indicates light mode. With an actual conditional theme pair\nconfigured (`theme = light:Rose Pine Dawn,dark:Rose Pine`) the same\nquery correctly returns `CSI ? 997 ; 1 n`.\n\nThe reporter narrows it to `Config.changeConditionalState`: the\nfunction only rebuilds the configuration when the changed state key is\nin `_conditional_set`, and a single non-conditional theme\n(`theme = Kitty Default`) does not add `.theme` to that set, so the\nscheme change is treated as irrelevant. The surface knows the scheme\nis dark, but the config copied into Termio keeps its default light\nstate, and the mode-2031 response reads from there. The issue includes\na minimal draft patch to `src/config/Config.zig` treating the theme\nstate as relevant even when the theme is not conditional."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "Hi! I'd like to take this one as a first Ghostty contribution. I\nreproduced the wrong mode-2031 report on the 1.3.1 release with a\nsingle non-conditional theme (report below), so it is not specific to\ndebug builds. Next I want to test the draft patch in the issue against\nboth the single-theme and conditional-pair configurations and report\nback before opening a PR.",
+  "repro_report_markdown": "Environment: ghostty 1.3.1 (release build, Fedora 42 RPM), GTK\nbackend, GNOME 48 (Wayland), dark system scheme.\n\nSteps:\n\n1. Config file containing only `theme = Kitty Default`, then launched:\n   `ghostty --config-default-files=false --config-file=./test-config\n   --window-theme=dark`\n2. In the new window, queried the color scheme:\n\n```\n$ printf '\\033[?996n' ; sleep 0.2 ; cat -v\n^[[?997;2n\n```\n\n3. Control: same launch with\n   `theme = light:Rose Pine Dawn,dark:Rose Pine`, same query:\n\n```\n$ printf '\\033[?996n' ; sleep 0.2 ; cat -v\n^[[?997;1n\n```\n\nExpected: `CSI ? 997 ; 1 n` (dark) in both runs, since the window is\nlaunched with `--window-theme=dark` and the GTK style manager reports\na dark scheme either way.\n\nActual: the single-theme run answers `997;2` (light, first capture),\nthe conditional-pair run answers `997;1` (dark, second capture),\nmatching the issue on a release build."
+}

@@ -1,0 +1,46 @@
+{
+  "id": "pkg-13",
+  "calibration": false,
+  "source": "microsoft/terminal#20443",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: microsoft/terminal (104622 stars, archived: no)\n- description: The new Windows Terminal and the original Windows console host, all in the same place!\n- latest release: v1.24.11911.0 (2026-07-16)\n- bug reports: template asks for the Windows Terminal version, the Windows build number, other relevant software, steps to reproduce, expected behavior, and actual behavior\n- contribution policy (CONTRIBUTING.md): standard contribution guide with a CLA; no stated AI policy"
+  },
+  "issue": {
+    "title": "Desktop-wide lag after long-running TUI sessions persists after Terminal restart; DWM restart required",
+    "number": 20443,
+    "author": "Polymistis",
+    "author_association": "NONE",
+    "opened": "2026-07-18",
+    "state": "open",
+    "labels": [
+      "Issue-Bug",
+      "Needs-Triage",
+      "Needs-Attention"
+    ],
+    "body_markdown": "Windows Terminal 1.24.11911.0, 3840x2160 display at 120 Hz. Steps:\nrun prolonged TUI sessions (Codex CLI, Claude Code) that produce\nfrequent spinner, status, title, and streamed-text redraws; after\nprolonged activity, window dragging, application switching, and desktop\nselection become severely choppy. Stopping the TUI workloads and\nreopening Terminal with one fresh window does not restore desktop\nresponsiveness; restarting `dwm.exe` restores it immediately. Exact\ntime-to-trigger is not deterministic. Default rendering settings (no\nacrylic, transparency, background image, or custom shader).\n\nResource checks from the reporter: RAM above 50 GB free, near-zero\npaging and disk, DWM handle counts comparable before and after, DWM CPU\nabout 104.6% on a one-logical-core scale before the restart and 7.7%\nafter. A related issue, microsoft/terminal#18422, reports similar lag\nbut recovers when Terminal closes; here only a DWM restart recovers."
+  },
+  "comments_total": 14,
+  "thread_highlights": [
+    {
+      "date": "2026-07-19",
+      "author": "JC-S",
+      "author_association": "NONE",
+      "summary_markdown": "running into the exact same issue, also triggered by Codex CLI and Claude Code"
+    },
+    {
+      "date": "2026-07-19",
+      "author": "Polymistis",
+      "author_association": "NONE",
+      "summary_markdown": "killing the DWM process (auto-restarts) restores performance completely"
+    },
+    {
+      "date": "2026-07-20",
+      "author": "Polymistis",
+      "author_association": "NONE",
+      "summary_markdown": "DWM stays stuck regardless of TUI activity; closing all terminal windows has no effect, which is why the report notes Terminal restart does not recover"
+    }
+  ],
+  "claim_comment_markdown": "I want to help with this one, it has been driving me crazy for months!\nI use Claude Code all day every day and my whole desktop turns into a\nslideshow just like this issue says. Assigning myself to this, I know\nexactly what the reporter is talking about.",
+  "repro_report_markdown": "Can 100% confirm this bug. I run long Claude Code sessions on Windows\n11 and after a few hours the entire desktop lags exactly as described:\ndragging windows is choppy, alt-tab is choppy, everything is choppy. I\nrestarted Terminal and it was still lagging, so this is definitely the\nDWM bug from this issue and not my machine. It happens every single\ntime I have a long session going, guaranteed reproducible on my end.\nMy machine is high end (RTX 4080, 64 GB RAM) so it is not a hardware\nproblem. This desperately needs a fix, the terminal is basically\nunusable for serious TUI work right now. Happy to test any patch!"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "pkg-11",
+  "calibration": false,
+  "source": "mikefarah/yq#2797",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: mikefarah/yq (15843 stars, archived: no)\n- description: yq is a portable command-line YAML, JSON, XML, CSV, TOML, HCL and properties processor.\n- latest release: v4.53.3 (2026-06-06)\n- bug reports: template asks for the yq version, operating system, how yq was installed, a concise input document (10 lines or less), the command run, actual behavior, and expected behavior\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "Multi-line strings erroneously written as single line in the presence of some UTF8 chars",
+    "number": 2797,
+    "author": "spockz",
+    "author_association": "NONE",
+    "opened": "2026-08-05",
+    "state": "open",
+    "labels": [
+      "bug",
+      "v4"
+    ],
+    "body_markdown": "When updating a yaml to add or update a field with a multi-line string,\nthe field is emitted as a single-line string with encoded newlines\ninstead of a multiline block, in the presence of some UTF8 characters.\n\nWith `some.yml` containing `foo: bar` and `broken.md` a multi-line file\ncontaining the 🚧 character, the command\n`yq eval '.longDescription |= (load_str(\"broken.md\"))' some.yaml`\nproduces a single double-quoted line with `\\n` escapes. Expected: a\n`longDescription: |` block scalar preserving the lines. Interestingly,\nthe same command with a file containing ✅ instead emits the expected\nblock scalar.\n\nVersion: 4.53.3. Operating system: linux. Installed via pacman."
+  },
+  "comments_total": 1,
+  "thread_highlights": [
+    {
+      "date": "2026-08-16",
+      "author": "ccoVeille",
+      "author_association": "NONE",
+      "summary_markdown": "a go-yaml maintainer; the underlying issue is tracked in yaml/go-yaml#354 with a fix PR in yaml/go-yaml#357"
+    }
+  ],
+  "claim_comment_markdown": "Hi, first contribution here. Reproduced this on 4.53.3 on macOS\n(report below); the character class seems to be what decides the\nemitter style. Given the go-yaml thread linked above, my plan is to\nverify whether yq's vendored go-yaml carries the fix from\nyaml/go-yaml#357 and report back before touching yq's own emitter\ncode.",
+  "repro_report_markdown": "Environment: yq 4.53.3 (Homebrew), macOS 15.5 (arm64).\n\nSteps:\n\n```\n$ printf 'foo: bar\\n' > some.yml\n$ printf 'Multiline file containing\\n\\n🚧\\n\\nA \"weird\" utf8 char?\\n' > broken.md\n$ yq eval '.longDescription |= (load_str(\"broken.md\"))' some.yml\nfoo: bar\nlongDescription: \"Multiline file containing\\n\\n\\U0001F6A7\\n\\nA \\\"weird\\\" utf8 char?\\n\"\n```\n\nControl with ✅ instead of 🚧:\n\n```\n$ printf 'Multiline file containing\\n\\n✅\\n\\nA \"less weird\" utf8 char?\\n' > works.md\n$ yq eval '.longDescription |= (load_str(\"works.md\"))' some.yml\nfoo: bar\nlongDescription: |\n  Multiline file containing\n\n  ✅\n\n  A \"less weird\" utf8 char?\n```\n\nExpected: both runs emit a block scalar (`longDescription: |`) that\npreserves the lines.\n\nActual: the 🚧 input collapses to a single double-quoted line with\nescaped newlines (shown above, with the character itself escaped as\n`\\U0001F6A7`); the ✅ input emits the expected block scalar. Matches\nthe report on a different OS and install method."
+}

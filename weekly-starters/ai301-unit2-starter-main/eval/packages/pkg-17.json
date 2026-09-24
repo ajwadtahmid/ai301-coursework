@@ -1,0 +1,45 @@
+{
+  "id": "pkg-17",
+  "calibration": false,
+  "source": "microsoft/terminal#20548",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: microsoft/terminal (104622 stars, archived: no)\n- description: The new Windows Terminal and the original Windows console host, all in the same place!\n- latest release: v1.24.11911.0 (2026-07-16)\n- bug reports: template asks for the Windows Terminal version, the Windows build number, other relevant software, steps to reproduce, expected behavior, and actual behavior\n- contribution policy (CONTRIBUTING.md): standard contribution guide with a CLA; no stated AI policy"
+  },
+  "issue": {
+    "title": "Sixel image output crashes the terminal",
+    "number": 20548,
+    "author": "igorkuzuro",
+    "author_association": "NONE",
+    "opened": "2026-08-14",
+    "state": "open",
+    "labels": [
+      "Issue-Bug",
+      "Needs-Triage"
+    ],
+    "body_markdown": "Windows Terminal built from the current git branch, Windows 11 26H2\n(Build 26300.9032), PowerShell 7.6.4. Executing applications that emit\nsixel graphics consistently causes the terminal process to crash:\nwinget with sixel support enabled triggers an immediate terminal\nfailure upon rendering output, and displaying sixel-encoded images\nwith ConvertTo-Sixel (PowerShell Sixel module) also terminates the\nterminal unexpectedly. The reporter bisected the crash to commit\ne907f9f (PR microsoft/terminal#20542, an IME artifact fix)."
+  },
+  "comments_total": 12,
+  "thread_highlights": [
+    {
+      "date": "2026-08-14",
+      "author": "lhecker",
+      "author_association": "MEMBER",
+      "summary_markdown": "cannot reproduce with default settings; asks for more specific repro steps and does not immediately see how that commit would cause a crash"
+    },
+    {
+      "date": "2026-08-14",
+      "author": "igorkuzuro",
+      "author_association": "NONE",
+      "summary_markdown": "works fine in a Debug build, still crashes in a Release build; compiling without the commit fixes it"
+    },
+    {
+      "date": "2026-08-14",
+      "author": "DHowett",
+      "author_association": "MEMBER",
+      "summary_markdown": "the call stack looks like a Hardened STL casualty, especially since it is in git main"
+    }
+  ],
+  "claim_comment_markdown": "Hi maintainers, I have fully reproduced this sixel crash (detailed\nreport below) and would like to take the issue. Since I confirmed it on\nthe Store release, I plan to start from the sixel output path rather\nthan the bisected commit.",
+  "repro_report_markdown": "### Reproduction Report: Sixel Crash (microsoft/terminal#20548)\n\n#### Summary\n\nI have completed a thorough, end-to-end reproduction of this issue and\ncan confirm the sixel rendering defect described above.\n\n#### Environment\n\n| Component | Version |\n|---|---|\n| Windows Terminal | 1.24.11911.0 (Microsoft Store) |\n| Windows | 11 26H2, Build 26300.9032 |\n| PowerShell | 7.6.4 |\n| Sixel module | 1.1.2 |\n\n#### Steps\n\n1. Installed the Sixel PowerShell module: `Install-Module Sixel`\n2. Downloaded a 256-color test PNG (512x512)\n3. Ran: `ConvertTo-Sixel -Path .\\test.png`\n\n#### Observed result\n\nThe terminal filled with pages of raw escape-sequence text: `q\"1;1;512;512#0;2;97;97;97#1;2;80;80;78...` and similar payload\ncharacters scrolled for several seconds, and the image never appeared.\nThe window remained open afterward and the prompt returned. This is\nexactly the kind of sixel output breakage the issue describes.\n\n#### Expected result\n\nThe PNG renders inline as a sixel image.\n\n#### Conclusion\n\nThe sixel pipeline is verifiably broken in Windows Terminal, matching\nthis issue. My reproduction confirms the bug on the current Store\nrelease, which also demonstrates that the problem is not limited to\ngit-main builds. Full marks to the reporter for the bisect; my results\nshow the user-facing impact clearly."
+}

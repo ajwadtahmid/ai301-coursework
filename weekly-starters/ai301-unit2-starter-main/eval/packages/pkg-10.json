@@ -1,0 +1,25 @@
+{
+  "id": "pkg-10",
+  "calibration": false,
+  "source": "starship/starship#7648",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: starship/starship (59450 stars, archived: no)\n- description: The minimal, blazing-fast, and infinitely customizable prompt for any shell!\n- latest release: v1.26.0 (2026-06-28)\n- bug reports: template asks reporters to file via `starship bug-report` (pre-populates the system configuration) and to give current behavior, expected behavior, environment (starship version, shell type and version, OS), and the relevant starship configuration\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "BUG: Prompt disappears when path is a symlink to a subdirectory inside a Git repository",
+    "number": 7648,
+    "author": "ccqpein",
+    "author_association": "CONTRIBUTOR",
+    "opened": "2026-08-01",
+    "state": "open",
+    "labels": [
+      "bug"
+    ],
+    "body_markdown": "Current behavior: when `[directory]` has `repo_root_style` enabled,\nvisiting a directory that is a symlink pointing to a subdirectory\ninside a Git repo, the `directory` module outputs nothing (the current\nworking directory vanishes from the prompt).\n\nFor example: logical path `~/projects/app-dir` symlinked to\n`/Users/user/code/monorepo/packages/app-dir`, Git root directory\n`/Users/user/code/monorepo`. Navigating to `~/projects/app-dir`\nrenders a blank directory prompt, and `starship explain` omits the\n`directory` module completely.\n\nExpected behavior: starship should still render the current directory\npath instead of hiding the directory module.\n\nPossible solution (from the reporter): in `src/modules/directory.rs`,\n`contract_repo_path(display_dir, repo_root)?` returns `None` for such\npaths and the `?` operator drops the whole module.\n\nEnvironment: starship 1.26.0, fish 4.7.1, no plugin manager, macOS.\nConfiguration: `[directory]` with `repo_root_style = \"bold red\"`."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "Hi! I picked this directory-module issue as a first contribution. I\ntried to reproduce it before claiming and so far cannot (details\nbelow): on my Linux + zsh setup the exact symlink layout renders fine.\nI'd still like to take it: my next step is a macOS + fish environment\nmatching the report, and reading `contract_repo_path` for the `None`\npath the reporter points at, which looks plausible independent of my\nfailed attempt.",
+  "repro_report_markdown": "Result: cannot reproduce on Linux + zsh with the report's exact layout\nand config. What I ran and what differed from the report's environment\nis below.\n\nEnvironment: starship 1.26.0 (cargo install), zsh 5.9, Ubuntu 24.04\n(x86_64). The report is macOS + fish 4.7.1; shell and OS both differ,\nstarship version matches.\n\nSteps:\n\n```\n$ mkdir -p ~/code/monorepo/packages/app-dir && cd ~/code/monorepo && git init -q\n$ mkdir -p ~/projects && ln -s ~/code/monorepo/packages/app-dir ~/projects/app-dir\n$ cat ~/.config/starship.toml\n[directory]\nrepo_root_style = \"bold red\"\n$ cd ~/projects/app-dir\n```\n\nPrompt after the last `cd` (colors stripped):\n\n```\nmonorepo/packages/app-dir on  master\n```\n\n`starship explain` in that directory lists the `directory` module with\nthe contracted repo path; it is not omitted.\n\nExpected (per the report): the directory module vanishes and\n`starship explain` omits it.\n\nActual: the module renders on every attempt (fresh shell, repeated\n`cd`, absolute vs `~` symlink targets). What differed from the report:\nOS (Linux vs macOS), shell (zsh vs fish), and my prompt shows the\nresolved physical path, which suggests my shell reports `PWD`\ndifferently for symlinked directories than fish does on macOS. A fish\nshell resolving `PWD` logically looks necessary to hit the\n`contract_repo_path` failure; I did not have one available for this\nattempt."
+}

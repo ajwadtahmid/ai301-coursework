@@ -1,0 +1,23 @@
+{
+  "id": "pkg-12",
+  "calibration": false,
+  "source": "prettier/prettier#19795",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: prettier/prettier (52204 stars, archived: no)\n- description: Prettier is an opinionated code formatter.\n- latest release: 3.9.6 (2026-07-21)\n- bug reports: template asks for the prettier version, a playground or runnable reproduction, the input, the actual output, and the expected output\n- contribution policy (CONTRIBUTING.md, section \"AI usage policy\"): only submit code you fully understand and have tested; be prepared to explain your changes; do not ignore the issue and PR templates; low-quality AI content is closed immediately"
+  },
+  "issue": {
+    "title": "Range formatting appends a stray token outside the range when the range starts with a comment in an arrow-function body",
+    "number": 19795,
+    "author": "erraitgrand-del",
+    "author_association": "NONE",
+    "opened": "2026-08-06",
+    "state": "open",
+    "labels": [],
+    "body_markdown": "Prettier 3.8.4, Node 22.23.1, `parser: \"babel\"`, default options. Range\nformatting appends a stray token outside the requested range when the\nrange starts with a comment inside an arrow-function body. Two shapes:\n\nShape A, arrow passed as a call argument, input\n`beforeEach(() => {\\n  // c\\n  a();\\n});\\n` with rangeStart 19,\nrangeEnd 32: the closing `});` becomes `};);`, which no longer parses.\n\nShape B, arrow assigned to a const, input\n`const f = () => {\\n  // c\\n  a();\\n};\\n` with rangeStart 18,\nrangeEnd 31: the closing `};` becomes `};;`, an extra empty statement,\nwhich parses and is therefore the quieter corruption.\n\nIn both cases the range covers the comment line plus the statement\nafter it. Expected: input unchanged, since the code inside the range is\nalready formatted and nothing outside the range should be touched. The\nreporter notes this is the same symptom as prettier/prettier#12964\n(closed, fixed for 2.8), whose own repro no longer reproduces on 3.8.4,\nso these look like variants the old fix did not cover."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "Hi, I'd like to investigate this range-formatting bug as a first\ncontribution. Both shapes reproduce for me on the current 3.9.6\nrelease (report below), so it is not specific to 3.8.4. My next step\nis tracing how range formatting decides the range's closing boundary\nwhen the first thing in range is a comment, starting from the fix that\nclosed prettier/prettier#12964.",
+  "repro_report_markdown": "Environment: prettier 3.9.6 (npm, fresh `npm install prettier@3.9.6`),\nNode 22.23.1, macOS 14.6 (arm64). The issue was filed against 3.8.4;\nboth shapes still reproduce on 3.9.6.\n\nSteps: ran the issue's script verbatim in an empty directory:\n\n```\n$ node repro.mjs\n```\n\nwith `repro.mjs` containing the issue's two `prettier.format` calls\n(shape A: rangeStart 19, rangeEnd 32; shape B: rangeStart 18,\nrangeEnd 31; both `parser: \"babel\"`).\n\nOutput, shape A:\n\n```\nbeforeEach(() => {\n  // c\n  a();\n};);\n```\n\nRe-parsing that output fails: `SyntaxError: Unexpected token, expected\n\",\" (4:2)`.\n\nOutput, shape B:\n\n```\nconst f = () => {\n  // c\n  a();\n};;\n```\n\nExpected: both inputs come back unchanged; nothing outside the range\nshould be touched.\n\nActual: shape A's `});` became `};);` (not parseable), shape B's `};`\nbecame `};;` (extra empty statement), matching the report exactly on\n3.9.6."
+}

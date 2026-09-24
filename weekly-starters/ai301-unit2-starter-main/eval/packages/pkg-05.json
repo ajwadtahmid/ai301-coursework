@@ -1,0 +1,25 @@
+{
+  "id": "pkg-05",
+  "calibration": false,
+  "source": "conda/conda#16543",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: conda/conda (7485 stars, archived: no)\n- description: A system-level, binary package and environment manager running on all major operating systems and platforms.\n- latest release: 26.7.0 (2026-07-31)\n- bug reports: template asks for a descriptive title, a duplicate search, what happened, and the output of `conda info` and `conda list`\n- contribution policy (CONTRIBUTING.md, section \"Generative AI\"): generative AI tools welcome; you are responsible for all contributions and must review and understand AI-generated content before including it in a pull request"
+  },
+  "issue": {
+    "title": "EnvironmentSectionNotValid message breaking json output",
+    "number": 16543,
+    "author": "beenje",
+    "author_association": "CONTRIBUTOR",
+    "opened": "2026-08-14",
+    "state": "open",
+    "labels": [
+      "type::bug"
+    ],
+    "body_markdown": "Running `conda env update --quiet --json -f <conda-lock python-3.14 environment yaml URL> 2>/dev/null` produces:\n\n```\nEnvironmentSectionNotValid: The following section on '<the yaml URL>' is invalid and will be ignored:\n - category\n\n{\n  \"success\": true,\n  \"message\": \"All requested packages already installed.\"\n}\n```\n\nwhich breaks the json output.\n\nThe `EnvironmentSectionNotValid` error message should be printed to stderr and not stdout.\n\nReporter's `conda info` shows conda 26.7.0, Python 3.12.7, libmamba solver, osx-arm64 (miniforge3)."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "First contribution attempt: I reproduced this on 26.7.0 (report below) and want to trace where `EnvironmentSectionNotValid` gets emitted, since with `--json` every human-readable message should be routed to stderr. I'll report back what I find in the exceptions path.",
+  "repro_report_markdown": "Environment: conda 26.7.0 (miniforge3), Python 3.12.7, macOS 15.5 (osx-arm64), libmamba solver.\n\nSteps: wrote a minimal `env.yml` containing a valid `dependencies:` list plus a `category:` section (the section conda does not recognize), then:\n\n```\n$ conda env update --quiet --json -f env.yml 2>/dev/null\nEnvironmentSectionNotValid: The following section on 'env.yml' is invalid and will be ignored:\n - category\n\n{\n  \"success\": true,\n  \"message\": \"All requested packages already installed.\"\n}\n```\n\nPiping the same stdout into a JSON parser fails on the leading error text:\n\n```\n$ conda env update --quiet --json -f env.yml 2>/dev/null | python3 -m json.tool\nExpecting value: line 1 column 1 (char 1)\n```\n\nExpected: with `--json` and stderr discarded, stdout contains exactly one parseable JSON document.\n\nActual: the `EnvironmentSectionNotValid` warning is printed to stdout above the JSON (shown above), so the stream does not parse. The warning belongs on stderr."
+}

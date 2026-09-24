@@ -1,0 +1,205 @@
+{
+  "captured": "2026-08-17",
+  "pass_bar": 18,
+  "categories": {
+    "clear-accept": "Clear accepts: the proof is faithful, followable, and honest",
+    "no-evidence": "No real evidence: assertion without artifacts, or artifacts that do not show the claimed behavior",
+    "wrong-target": "Wrong-target or unfaithful: adjacent symptom, silent environment deviation, or steps that skip the trigger",
+    "unfollowable-comms": "Unfollowable or comms failures: no environment record, steps a stranger cannot re-run, or a boilerplate over-promising comment",
+    "disclosure": "Disclosure walls: the repo's stated AI policy requires disclosure and the comment does not disclose"
+  },
+  "items": [
+    {
+      "id": "pkg-01",
+      "source": "httpie/cli#1640",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "faithful offline repro of the missing Content-Type with a control run; env recorded; claim specific and modest"
+    },
+    {
+      "id": "pkg-02",
+      "source": "sharkdp/bat#3845",
+      "category": "wrong-target",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "ran a prefix range instead of the issue's offset-from-end syntax; got a graceful arg-validation error (exit 1), narrated as the reported capacity-overflow crash (exit 101)"
+    },
+    {
+      "id": "pkg-03",
+      "source": "BurntSushi/ripgrep#2779",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "exact-steps repro on current version with a minus-replace control matching the owner's trigger note; version delta acknowledged; human-voiced comment satisfies the repo's AI-comment rule"
+    },
+    {
+      "id": "pkg-04",
+      "source": "junegunn/fzf#2021",
+      "category": "no-evidence",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "pure me-too: no environment, no steps, no artifact; claim comment is a +1 with no intent"
+    },
+    {
+      "id": "pkg-05",
+      "source": "conda/conda#16543",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "minimal env.yml repro with a json.tool parse failure as the artifact; conda's stated generative-AI policy is permissive-with-responsibility, no disclosure requirement"
+    },
+    {
+      "id": "pkg-06",
+      "source": "kubernetes/minikube#11645",
+      "category": "unfollowable-comms",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "log excerpt looks right but there is no environment record at all (no OS, driver, or minikube version) and the steps omit the driver on a Windows-specific issue; a stranger cannot re-run or even place the attempt"
+    },
+    {
+      "id": "pkg-07",
+      "source": "processing/p5.js#7168",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "language-priority repro with an English-first control; version delta stated; discloses AI assistance as p5.js's stated policy requires, which is what the conditional-policy pass looks like"
+    },
+    {
+      "id": "pkg-08",
+      "source": "jqlang/jq#3128",
+      "category": "wrong-target",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "modified the expression so $b is unbound, producing a compile error, not the issue's Invalid path expression behavior; two-machines certainty narrated over the wrong artifact"
+    },
+    {
+      "id": "pkg-09",
+      "source": "sharkdp/fd#2033",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "honest cannot-reproduce: real attempt at the argument-size reordering with marker-order artifacts, names what differed (uniform name lengths, 2 MiB ARG_MAX) and what a triggering setup likely needs"
+    },
+    {
+      "id": "pkg-10",
+      "source": "starship/starship#7648",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "honest cannot-reproduce: exact layout and config, prompt artifact shown, names the environment differences (Linux+zsh vs macOS+fish) and the PWD-resolution hypothesis for why fish matters"
+    },
+    {
+      "id": "pkg-11",
+      "source": "mikefarah/yq#2797",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "terse but complete: env line, exact commands, failing run plus control character, expected vs actual as observations"
+    },
+    {
+      "id": "pkg-12",
+      "source": "prettier/prettier#19795",
+      "category": "clear-accept",
+      "calibration": false,
+      "verdict": "accept",
+      "note": "both shapes reproduced on the current release with outputs shown; version delta stated; next step concrete"
+    },
+    {
+      "id": "pkg-13",
+      "source": "microsoft/terminal#20443",
+      "category": "no-evidence",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "enthusiastic confirmation with zero artifacts: no measurements, no DWM observations, no steps; 'guaranteed reproducible' backed by nothing; self-assignment claim with no concrete intent"
+    },
+    {
+      "id": "pkg-14",
+      "source": "zellij-org/zellij#5451",
+      "category": "no-evidence",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "artifacts show only that zellij runs (version banner, session list, tabs visible); nothing shows a blank pane, a dump-screen result, or the log stall; 'expected' is even stated backwards from what was shown"
+    },
+    {
+      "id": "pkg-15",
+      "source": "laurent22/joplin#16205",
+      "category": "no-evidence",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "confident root-cause diagnosis (debounce race) with no shown evidence: no repro transcript, no artifact, 'I verified this race condition' backed by nothing"
+    },
+    {
+      "id": "pkg-16",
+      "source": "pandas-dev/pandas#66656",
+      "category": "wrong-target",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "tested pandas 1.5.3 against an issue confirmed on latest and main, without acknowledging the deviation; the shown ValueError is that old version's behavior, not evidence about the reported bug"
+    },
+    {
+      "id": "pkg-17",
+      "source": "microsoft/terminal#20548",
+      "category": "wrong-target",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "polished report whose own artifact shows garbled escape-sequence output with the terminal still alive, presented as confirming a crash; also generalizes the bug to the Store release the maintainers could not reproduce on"
+    },
+    {
+      "id": "pkg-18",
+      "source": "golangci/golangci-lint#4242",
+      "category": "unfollowable-comms",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "reproduction lives entirely in a private monorepo with an unshared config; a stranger cannot re-run any step, and the trimmed trace differs from the issue's without comment"
+    },
+    {
+      "id": "pkg-19",
+      "source": "vuejs/core#15205",
+      "category": "unfollowable-comms",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "the repro report is fine; the claim comment is interchangeable assign-me boilerplate promising a guaranteed 2-day fix, which fails specificity and honest-intent"
+    },
+    {
+      "id": "pkg-20",
+      "source": "ghostty-org/ghostty#13604",
+      "category": "disclosure",
+      "calibration": false,
+      "verdict": "reject",
+      "note": "excellent repro on every proof check; ghostty's stated AI policy requires disclosing all AI usage and the comments do not disclose (course packages are treated as AI-assisted work); the one-item category the floor exists for"
+    },
+    {
+      "id": "calib-01",
+      "source": "jesseduffield/lazygit#5883",
+      "category": "clear-accept",
+      "calibration": true,
+      "verdict": "accept",
+      "note": "worksheet clear accept: terse but complete (env, 4 steps, stash-list artifact, expected vs actual); anchors 'looks rough, is fine'"
+    },
+    {
+      "id": "calib-02",
+      "source": "laurent22/joplin#16196",
+      "category": "no-evidence",
+      "calibration": true,
+      "verdict": "reject",
+      "note": "worksheet clear reject: emphatic me-too with zero evidence and a cause asserted from vibes; every reasonable rubric holds it"
+    },
+    {
+      "id": "calib-03",
+      "source": "mikefarah/yq#2795",
+      "category": "wrong-target",
+      "calibration": true,
+      "verdict": "reject",
+      "note": "worksheet trap (operator-swap package): long, confident, beautifully formatted, but the input uses a colon instead of '=', so the artifact is a graceful HCL syntax error, not the issue's panic; splits artifact-readers from formatting-graders"
+    },
+    {
+      "id": "calib-04",
+      "source": "sharkdp/hyperfine#920",
+      "category": "unfollowable-comms",
+      "calibration": true,
+      "verdict": "reject",
+      "note": "worksheet borderline: exact-command repro with the panic shown and a control run, but no environment record at all, on an issue where the build profile changes the failure mode; defensible both ways, master rejects on env-recorded"
+    }
+  ]
+}

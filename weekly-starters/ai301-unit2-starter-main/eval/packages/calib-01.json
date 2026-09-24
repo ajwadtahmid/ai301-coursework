@@ -1,0 +1,38 @@
+{
+  "id": "calib-01",
+  "calibration": true,
+  "source": "jesseduffield/lazygit#5883",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: jesseduffield/lazygit (81407 stars, archived: no)\n- description: Simple terminal UI for git commands.\n- latest release: v0.64.1 (2026-08-12)\n- bug reports: template asks for the lazygit version, git version, operating system, and a description with steps\n- contribution policy (CONTRIBUTING.md): the maintainer reviews outside pull requests only selectively (maintaining is a hobby and review time is scarce, especially with AI-generated PRs hard to assess); issue reports remain welcome; no stated AI disclosure requirement"
+  },
+  "issue": {
+    "title": "[UX] Pressing 's' to stash untracked files accepts a name but silently does nothing",
+    "number": 5883,
+    "author": "ThatOn3Gu7",
+    "author_association": "NONE",
+    "opened": "2026-07-31",
+    "state": "open",
+    "labels": [
+      "bug"
+    ],
+    "body_markdown": "With an untracked file focused in the Files panel, pressing `s` opens\nthe \"Stash name\" popup as if everything is good to go. After typing a\nname and hitting Enter, the popup closes and nothing happens: the file\nremains untracked, no stash is created, and no toast or error explains\nwhy. Standard `git stash` ignores untracked files by default (that is\nwhat `Shift+S`, stash including untracked, is for), so the failure is\nunderstandable under the hood, but the name prompt appearing makes the\nsilent no-op confusing.\n\nSteps: 1. create a brand-new untracked file in a repo with no other\ntracked changes; 2. focus it in the Files panel and press `s`; 3. type\na stash name, hit Enter; 4. the prompt disappears, no stash, no\nnotification.\n\nEnvironment: lazygit v0.63.1 (Termux, Android arm64), git 2.55.0."
+  },
+  "comments_total": 2,
+  "thread_highlights": [
+    {
+      "date": "2026-07-31",
+      "author": "ThatOn3Gu7",
+      "author_association": "NONE",
+      "summary_markdown": "hope you guys fix it soon"
+    },
+    {
+      "date": "2026-08-08",
+      "author": "bhallashivam1997",
+      "author_association": "NONE",
+      "summary_markdown": "pushed a fix for this"
+    }
+  ],
+  "claim_comment_markdown": "Hi, I'd like to look at this stash UX papercut as a first\ncontribution. Reproduced on current 0.64.1 on Linux (report below), so\nit is not Termux-specific. Plan: find where the stash-name prompt\ndecides to appear and make the untracked-only case either warn or\nstash with `--include-untracked`.",
+  "repro_report_markdown": "Environment: lazygit 0.64.1 (release binary), git 2.55.0, Ubuntu 24.04.\nThe issue was filed from v0.63.1 on Termux; same behavior here.\n\nSteps and observed:\n\n```\n$ git init -q t && cd t && touch new.txt\n$ lazygit   # focus new.txt in Files, press 's', name it \"test\", Enter\n$ git stash list\n$ git status --short\n?? new.txt\n```\n\nExpected: a stash named \"test\" exists (or an error says untracked\nfiles cannot be stashed this way).\n\nActual: the popup closed with no message; `git stash list` prints\nnothing and the file is still untracked, as shown."
+}

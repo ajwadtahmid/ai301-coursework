@@ -1,0 +1,40 @@
+{
+  "id": "pkg-19",
+  "calibration": false,
+  "source": "vuejs/core#15205",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: vuejs/core (54211 stars, archived: no)\n- description: Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.\n- latest release: v3.5.41 (2026-08-05)\n- bug reports: template requires the version, a minimal reproduction link (SFC playground or repo), steps to reproduce, what is expected, and what is actually happening\n- contribution policy (.github/contributing.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "@vue/compiler-sfc: Partly unscoped styling with selector list & :deep & nesting",
+    "number": 15205,
+    "author": "stellar7073",
+    "author_association": "NONE",
+    "opened": "2026-08-03",
+    "state": "open",
+    "labels": [
+      "scope: sfc",
+      "has workaround",
+      "p3-minor-bug"
+    ],
+    "body_markdown": "Version 3.6.0-rc.2, with an SFC playground reproduction link. When a\n`<style scoped>` rule has (1) a comma-separated selector list, where\n(2) one member uses `:deep()`, and (3) the rule contains nested child\nrules, the scope id (`[data-v-xxx]`) is not injected into the\nnon-`:deep()` selectors in the list. Those selectors become unscoped\nand leak globally.\n\nTrigger example:\n\n```css\n.a,\n.b :deep(.c) {\n  color: red;\n  > span { color: blue; }\n}\n```\n\nExpected: `.a[data-v-xxx]` in the output. Actually happening: `.a`\nstays unscoped while `.b[data-v-xxx] .c` is handled."
+  },
+  "comments_total": 2,
+  "thread_highlights": [
+    {
+      "date": "2026-08-04",
+      "author": "edison1105",
+      "author_association": "MEMBER",
+      "summary_markdown": "spells out the expected scoped-CSS output semantics for normal nested rules and for deep rules, settling what correct output looks like"
+    },
+    {
+      "date": "2026-08-11",
+      "author": "ValentinYoushkevich",
+      "author_association": "NONE",
+      "summary_markdown": "with the member's spec as reference, reports that the currently open fix PR does not satisfy it, with `compileStyle` outputs for the four selector shapes"
+    }
+  ],
+  "claim_comment_markdown": "Hello sir! Great project, I love Vue and use it every day. I am very\ninterested in contributing to this amazing repository and this issue\nlooks like a good one for me. Kindly assign it to me, I will fix it\nwithin 2 days guaranteed. I have attached my reproduction below,\nplease check it and keep this issue reserved for me. Looking forward\nto my first of many contributions here, thank you so much!",
+  "repro_report_markdown": "Environment: @vue/compiler-sfc 3.6.0-rc.2 via the official SFC\nplayground (Chrome 139, macOS 14.6).\n\nSteps: opened the issue's playground link, then re-created it from\nscratch in a fresh playground to rule out link staleness: a component\nwith the issue's exact scoped style block (selector list, one `:deep()`\nmember, one nested `> span` rule).\n\nProduced CSS (from the playground's CSS output pane):\n\n```css\n.a,\n.b[data-v-7ba5bd90] .c {\n& {\n  color: red;\n}\n> span { color: blue;\n}\n}\n```\n\nExpected: `.a[data-v-7ba5bd90]` as the first selector, per the\nmember's comment on correct scoped output.\n\nActual: `.a` has no scope attribute (shown above), so it applies\nglobally; a sibling component with a plain `.a` class picks up the\nred color, which I confirmed by adding one next to the test component\nin the same playground."
+}

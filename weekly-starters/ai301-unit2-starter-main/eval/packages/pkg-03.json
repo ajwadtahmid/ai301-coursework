@@ -1,0 +1,44 @@
+{
+  "id": "pkg-03",
+  "calibration": false,
+  "source": "BurntSushi/ripgrep#2779",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: BurntSushi/ripgrep (67344 stars, archived: no)\n- description: ripgrep recursively searches directories for a regex pattern while respecting your gitignore.\n- latest release: 15.2.0 (2026-07-15)\n- bug reports: template asks for the ripgrep version, how it was installed, the operating system, a description of the bug, steps to reproduce, actual behavior, and expected behavior\n- contribution policy (CONTRIBUTING.md section \"Use of AI\", AI_POLICY.md): AI-assisted coding is welcome with a human in the loop who understands the work; comments to maintainers must be written by humans in their own words, and AI-generated comments may be hidden"
+  },
+  "issue": {
+    "title": "Adjacent replaced multiline matches result in wrong line numbers",
+    "number": 2779,
+    "author": "meedstrom",
+    "author_association": "NONE",
+    "opened": "2024-04-11",
+    "state": "open",
+    "labels": [
+      "bug"
+    ],
+    "body_markdown": "Version: ripgrep 13.0.0. OS: Kubuntu 23.10, installed via APT.\n\nUsing a multiline regexp with `--replace`, when the regexp matches strings that come immediately one after another, it bungles the line numbers of all of them.\n\nSteps to reproduce: save a file `test.txt` containing:\n\n```\n:properties:\n:id: fnord\n:end:\n:properties:\n:id: boccob\n:end:\n:properties:\n:id: d321fdddffff\n:end:\n:properties:\n:id: clowns\n:end:\n```\n\nThen run:\n\n```\nrg -nU '^:properties:\\n:id: (.*)\\n:end:' -r '$1' test.txt\n```\n\nActual behavior:\n\n```\n1:fnord\n2:boccob\n3:d321fdddffff\n4:clowns\n```\n\nOnly the first hit is correct. Expected:\n\n```\n1:fnord\n4:boccob\n7:d321fdddffff\n10:clowns\n```"
+  },
+  "comments_total": 6,
+  "thread_highlights": [
+    {
+      "date": "2024-04-11",
+      "author": "BurntSushi",
+      "author_association": "OWNER",
+      "summary_markdown": "the incomplete part of the description: it is not just adjacent matches, the `--replace` flag is also required to trigger it"
+    },
+    {
+      "date": "2024-04-26",
+      "author": "meedstrom",
+      "author_association": "NONE",
+      "summary_markdown": "offered to look for the problem, asked for pointers"
+    },
+    {
+      "date": "2024-04-26",
+      "author": "BurntSushi",
+      "author_association": "OWNER",
+      "summary_markdown": "likely in `grep-printer`; look at the \"standard\" printer"
+    }
+  ],
+  "claim_comment_markdown": "I'd like to take a run at this one as a first contribution. Reproduced on current 15.2.0 (report below), and per the pointer above I'll start reading the standard printer in grep-printer to see where line numbers are computed for adjacent replaced matches.",
+  "repro_report_markdown": "Environment: ripgrep 15.2.0 (cargo install), Arch Linux (x86_64). The issue was filed against 13.0.0; behavior is unchanged on 15.2.0.\n\nSteps: created `test.txt` with the exact 12 lines from the issue (four `:properties:`/`:id:`/`:end:` blocks, no blank lines between them), then:\n\n```\n$ rg -nU '^:properties:\\n:id: (.*)\\n:end:' -r '$1' test.txt\n1:fnord\n2:boccob\n3:d321fdddffff\n4:clowns\n```\n\nExpected: line numbers of each match's starting line, so 1, 4, 7, 10.\n\nActual: 1, 2, 3, 4 as shown above; every match after the first reports the wrong line. Dropping `-r '$1'` from the same command reports 1, 4, 7, 10 correctly, which matches the owner's note that `--replace` is required to trigger it."
+}

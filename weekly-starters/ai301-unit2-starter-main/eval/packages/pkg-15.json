@@ -1,0 +1,28 @@
+{
+  "id": "pkg-15",
+  "calibration": false,
+  "source": "laurent22/joplin#16205",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: laurent22/joplin (55975 stars, archived: no)\n- description: Joplin, the privacy-focused note taking app with sync capabilities for Windows, macOS, Linux, Android and iOS.\n- latest release: v3.6.15 (2026-06-20)\n- bug reports: template asks for the operating system, the Joplin version, desktop version info, current behavior, expected behavior, and logs\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "Desktop: Switching note immediately after changing the text will lose the text, when using the Rich Text editor",
+    "number": 16205,
+    "author": "mrjo118",
+    "author_association": "COLLABORATOR",
+    "opened": "2026-08-13",
+    "state": "open",
+    "labels": [
+      "bug",
+      "high",
+      "Regression",
+      "v3.7"
+    ],
+    "body_markdown": "Operating system: Windows. Joplin version: 3.7.10.\n\nReproduction steps: open Joplin and select the Rich Text editor; type\na character, or a continuous stream of characters very quickly without\nstopping, then immediately switch to another note in the note list\n(before the toggle between RTE and MDE button is re-enabled); wait a\nsecond or two; switch back to the original note. The last change is\nmissing, but an update is still uploaded to the server. If the note is\ninstead opened in a new window and that window is closed immediately\nafter making a change this quickly, no changes are lost.\n\nThe issue does not occur in Joplin 3.6. A screen recording is attached\nto the issue. Expected: all changes are saved when switching notes\nwhile using the RTE, the same way closing a note window saves them."
+  },
+  "comments_total": 0,
+  "thread_highlights": [],
+  "claim_comment_markdown": "Hi, I'd like to work on this data-loss regression. I've already\nreproduced it and tracked down the root cause (see my report below),\nso I should be able to have a fix approach to discuss soon.",
+  "repro_report_markdown": "I reproduced this bug and identified the exact root cause.\n\nEnvironment: Joplin 3.7.10, Windows 11.\n\nThe problem is a race condition between the Rich Text editor's\ndebounced save and the note-switch handler. The RTE schedules its save\non a debounce timer, and when you switch notes quickly, `loadNote`\ncancels the pending save before it fires, which is why the last\nkeystrokes vanish. The new-window path is unaffected because closing a\nwindow flushes the editor synchronously. I verified this race\ncondition is the cause; the fix is to flush the pending save in the\nswitch handler before the new note loads, the same flush the window\nclose path already does.\n\nExpected: the last change survives a fast note switch.\n\nActual: the change is lost, exactly as the issue describes, because\nthe debounced save is cancelled by the switch. I am confident this is\nthe correct diagnosis."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "pkg-09",
+  "calibration": false,
+  "source": "sharkdp/fd#2033",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: sharkdp/fd (44113 stars, archived: no)\n- description: A simple, fast and user-friendly alternative to 'find'.\n- latest release: v10.4.2 (2026-03-10)\n- bug reports: template asks reporters to confirm they read the troubleshooting section, describe the bug and the expected behavior, and give their fd version and operating system\n- contribution policy (CONTRIBUTING.md, pull-request guidelines): AI-assisted code contributions are accepted from contributors who understand the code and must state the tool and the extent of its use in the pull request; comments to maintainers are expected to be in the contributor's own words and voice (AI help with grammar, spelling, and proofreading is fine); the policy states no disclosure ask for issue comments"
+  },
+  "issue": {
+    "title": "[BUG] `--exec-batch` doesn't always run commands in order",
+    "number": 2033,
+    "author": "tmccombs",
+    "author_association": "COLLABORATOR",
+    "opened": "2026-06-23",
+    "state": "open",
+    "labels": [
+      "bug"
+    ],
+    "body_markdown": "The man documentation for `--exec-batch` states: \"Like --exec, this can\nbe used multiple times, in which case each command will be run in the\norder given.\" However, there are a couple of scenarios where this does\nnot happen:\n\n1. If `--batch-size` is used, then all commands will be run in order on\n   each batch. This is potentially expected behavior, but if so, should\n   be better documented.\n2. If the command line size limit is hit for one command before\n   another, say the second command hits the limit before the first\n   does, then the command that hits the limit first will be run before\n   the other. This is certainly unexpected and surprising behavior, and\n   we should probably handle that better.\n\nVersion: 10.4.2. Operating system: applies to all."
+  },
+  "comments_total": 1,
+  "thread_highlights": [
+    {
+      "date": "2026-06-30",
+      "author": "hiSandog",
+      "author_association": "NONE",
+      "summary_markdown": "the second case seems like the more surprising contract violation; suggests an acceptance test with two batch commands appending markers to a file, one command forced to flush earlier by a lower argument-size threshold, with the marker order required to match the CLI order"
+    }
+  ],
+  "claim_comment_markdown": "Hi, I'd like to look into the ordering guarantee here as a first\ncontribution. I spent an evening trying to trigger scenario 2 (the\nargument-size flush reordering) and could not provoke it on my machine;\nmy full attempt is below, including what I think differed. If the\nreordering needs a specific length distribution to trigger, I'd like to\nwork toward the acceptance test suggested in the thread.",
+  "repro_report_markdown": "Result: I could NOT reproduce scenario 2 (a later `--exec-batch`\ncommand running before an earlier one when the argument-size limit is\nhit). I did not test scenario 1 (`--batch-size` interleaving); this\nreport is about scenario 2 only. Details of the failed attempt and\nwhat differed from the report's conditions below.\n\nEnvironment: fd 10.4.2 (pacman), Arch Linux (x86_64), kernel 6.15,\n`getconf ARG_MAX` = 2097152.\n\nSteps:\n\n```\n$ mkdir /tmp/fdtest && cd /tmp/fdtest\n$ for i in $(seq 1 120000); do : > \"$(printf 'file_%06d_%s' \"$i\" \\\n    \"$(head -c 180 /dev/zero | tr '\\0' 'x')\")\"; done\n$ fd -t f . \\\n    --exec-batch sh -c 'echo ONE >> /tmp/order.log; true -- \"$@\"' _ \\\n    --exec-batch sh -c 'echo TWO >> /tmp/order.log; true -- \"$@\"' _\n$ cat /tmp/order.log\nONE\nONE\nONE\nTWO\nTWO\nTWO\n```\n\nWith 120000 files of ~190-character names, each command's argument list\nexceeds ARG_MAX and flushes in three batches. I ran this 5 times and\nalso re-ran with the second command's arguments padded to be ~40%\nlonger than the first's (a longer wrapper string), trying to make\ncommand TWO hit the limit first.\n\nExpected (per the report): with the second command hitting the size\nlimit first, a TWO flush should appear in the log before the final ONE\nflush.\n\nActual: in every run, all ONE batches were written before any TWO\nbatch; I never observed a TWO marker overtaking a ONE marker.\n\nWhat differed from the report's conditions: the report states the\nreordering needs one command to hit the limit before the other, and my\npadding approach may not achieve that, since fd appears to flush both\ncommand buffers at the same file-count boundary on this input (uniform\nname lengths). A distribution where argument lengths differ per file,\nor a much lower forced limit than my 2 MiB ARG_MAX, may be required. I\ndid not find a knob to force a smaller limit from the CLI."
+}

@@ -1,0 +1,45 @@
+{
+  "id": "pkg-18",
+  "calibration": false,
+  "source": "golangci/golangci-lint#4242",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: golangci/golangci-lint (19261 stars, archived: no)\n- description: Fast linters runner for Go.\n- latest release: v2.12.2 (2026-05-06)\n- bug reports: template asks reporters to confirm they use a binary release within the 2 latest major releases, searched existing issues, read the typecheck FAQ, and tried the standalone linter, then to provide a problem description, the golangci-lint version, the configuration, the Go environment, and a code example\n- contribution policy (CONTRIBUTING.md): standard contribution guide; no stated AI policy"
+  },
+  "issue": {
+    "title": "gomodguard: Panic stack trace: goroutine 1 [running] / can't run linter goanalysis_metalinter: panic occurred",
+    "number": 4242,
+    "author": "honey-yogurt",
+    "author_association": "NONE",
+    "opened": "2023-12-08",
+    "state": "open",
+    "labels": [
+      "bug",
+      "dependencies"
+    ],
+    "body_markdown": "First golangci-lint use, adding pre-commit to an existing project. The\nproject's go.mod file is not in the root directory; after renaming the\ndirectory containing go.mod, golangci-lint fails with a gomodguard\npanic (`can't run linter goanalysis_metalinter: panic occurred`) and a\nruntime stack trace. Reported with v1.46.2 via pre-commit, then\nconfirmed unchanged after updating to v1.55.2."
+  },
+  "comments_total": 8,
+  "thread_highlights": [
+    {
+      "date": "2023-12-08",
+      "author": "honey-yogurt",
+      "author_association": "NONE",
+      "summary_markdown": "updated to v1.55.2, same error"
+    },
+    {
+      "date": "2023-12-08",
+      "author": "Antonboom",
+      "author_association": "CONTRIBUTOR",
+      "summary_markdown": "the panic is in gomodguard itself (processor.go line 146), not golangci-lint; suggests filing there"
+    },
+    {
+      "date": "2023-12-08",
+      "author": "honey-yogurt",
+      "author_association": "NONE",
+      "summary_markdown": "filed ryancurrah/gomodguard#40 upstream"
+    }
+  ],
+  "claim_comment_markdown": "Hi, I'd like to work on this gomodguard panic. We hit this exact crash\nat my job this week, so I have a live environment where it reproduces\n(report below) and a strong motivation to see it fixed. I'll\ncoordinate with the upstream gomodguard issue as needed.",
+  "repro_report_markdown": "Reproduced the panic in our work environment.\n\nEnvironment: golangci-lint v1.55.2 (binary release), Go 1.21, macOS 14.\n\nSteps:\n\n1. Checked out our company monorepo (private; I cannot share it or its\n   layout, but the relevant part matches the issue: go.mod lives in a\n   subdirectory, not the repo root).\n2. Used our internal `.golangci.yml`, which configures gomodguard with\n   our internal blocked-modules list (also not shareable, but it is a\n   normal gomodguard block list).\n3. Ran our pre-commit hook, which invokes golangci-lint the same way\n   as the issue reporter's setup.\n\nOutput (trimmed to the relevant lines):\n\n```\nERRO [linters_context] gomodguard: parse module file: ...\npanic: runtime error: invalid memory address or nil pointer dereference\ngoroutine 1 [running]:\nruntime/debug.Stack()\ngithub.com/ryancurrah/gomodguard.(*Processor).processFiles(...)\nERRO Running error: can't run linter goanalysis_metalinter: panic occurred\n```\n\nExpected: golangci-lint reports lint findings, or a readable\nconfiguration error if the go.mod location is a problem.\n\nActual: the gomodguard panic above, matching the issue. It reproduces\nevery time in our repo; when I copied the same config into a fresh\nscratch module with go.mod at the root, it did not reproduce, so the\nsubdirectory layout looks essential, as the issue says."
+}

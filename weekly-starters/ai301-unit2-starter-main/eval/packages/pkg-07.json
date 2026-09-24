@@ -1,0 +1,44 @@
+{
+  "id": "pkg-07",
+  "calibration": false,
+  "source": "processing/p5.js#7168",
+  "captured": "2026-08-17",
+  "repo_facts": {
+    "raw_markdown": "- repo: processing/p5.js (23878 stars, archived: no)\n- description: p5.js is a client-side JS platform that empowers artists, designers, students, and anyone to learn to code and express themselves creatively on the web.\n- latest release: v2.3.2 (2026-07-30)\n- bug reports: template asks for the p5.js version, operating system, web browser and version, actual behavior, expected behavior, and steps to reproduce with a snippet\n- contribution policy (CONTRIBUTING.md, section \"AI Usage Policy\"): fully AI-generated contributions are not accepted; assistive AI use is allowed, and the contributor must understand and take responsibility for every change (details in AI_USAGE_POLICY.md)"
+  },
+  "issue": {
+    "title": "FES message is broken if reserved words are used.",
+    "number": 7168,
+    "author": "shibomb",
+    "author_association": "CONTRIBUTOR",
+    "opened": "2024-08-03",
+    "state": "open",
+    "labels": [
+      "Bug"
+    ],
+    "body_markdown": "p5.js version: 1.9.4, 1.10.0. Browser: any, with a non-English language (e.g. Spanish, Japanese) first in the browser's language priority settings.\n\nActual behavior: set the browser's language preference to Japanese; when executing code using reserved words, an error appears in the console, as if the FES message could not be generated:\n\n```\nTypeError: Cannot read properties of undefined (reading 'replaceAll')\np5.js translator called before translations were loaded\n```\n\nThe problem does not occur if the browser's language preference is set to English:\n\n```\n🌸 p5.js says: you have used a p5.js reserved function \"value\" make sure you change the function name to something else.\n```\n\nExpected behavior: the translated FES message (or at minimum the English message) should be displayed.\n\nSteps: 1. set the browser's language preference to non-English; 2. add `let value = 0` in the setup function; 3. play."
+  },
+  "comments_total": 9,
+  "thread_highlights": [
+    {
+      "date": "2024-08-12",
+      "author": "raclim",
+      "author_association": "CONTRIBUTOR",
+      "summary_markdown": "thanks for reporting; wondering if this could be addressed through the FES"
+    },
+    {
+      "date": "2024-08-12",
+      "author": "Qianqianye",
+      "author_association": "CONTRIBUTOR",
+      "summary_markdown": "tagged the FES working group to take a look"
+    },
+    {
+      "date": "2024-08-13",
+      "author": "limzykenneth",
+      "author_association": "MEMBER",
+      "summary_markdown": "looking into this; notes the correct behavior may be to not display the message at all, since `value` is not a top-level defined variable"
+    }
+  ],
+  "claim_comment_markdown": "Hi! I'd like to investigate this FES translation bug as a first contribution. I reproduced it on 1.11.7 with Japanese language settings (full report below). Per the AI usage policy: I used an AI assistant to help me organize this report; I ran and verified every step myself and I understand what I'm reporting. Next step for me is reading how the translator loads locale files relative to when FES fires.",
+  "repro_report_markdown": "Environment: p5.js 1.11.7 (CDN single file), Chrome 139.0 on macOS 14.6. Browser language order: Japanese first, then English (chrome://settings/languages). The issue was filed against 1.9.4/1.10.0; it is still present on 1.11.7.\n\nSteps:\n\n1. Created an index.html loading p5.js 1.11.7 from the CDN with this sketch:\n\n```js\nfunction setup() {\n  createCanvas(400, 400);\n  let value = 0;\n}\n```\n\n2. Set Chrome's language priority to Japanese first, reloaded the page, opened the console.\n\nConsole output (Japanese-first):\n\n```\nTypeError: Cannot read properties of undefined (reading 'replaceAll')\np5.js translator called before translations were loaded\n```\n\n3. Control: moved English to the top of the language list, reloaded the same page.\n\nConsole output (English-first):\n\n```\n🌸 p5.js says: you have used a p5.js reserved function \"value\" make sure you change the function name to something else.\n```\n\nExpected: the reserved-word FES message appears regardless of browser language (translated, or English as fallback).\n\nActual: with a non-English language first, the TypeError above replaces the FES message entirely; with English first, the message renders. This matches the behavior the issue describes exactly."
+}
