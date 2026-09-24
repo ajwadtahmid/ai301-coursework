@@ -23,11 +23,50 @@ ajwadtahmid
 
 **Claim comment**
 
-[To be posted after skill evaluation completes. Link to the comment where you claimed the issue, plus the text of that comment.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5809555683
+
+I'd like to work on this issue as a first contribution. I can reproduce the `ZeroDivisionError` when calling `KeywordSearcher.index([])` with an empty chunk list. The `search()` method already handles empty indexes gracefully (returns `[]`), but `index()` crashes when initializing `BM25Okapi` with an empty corpus.
+
+Next I want to:
+1. Add an empty-check guard to the `index()` method to match the defensive behavior of `search()`
+2. Verify the xfail test passes after the fix
+3. Confirm no existing tests regress
 
 **Reproduction comment**
 
-[To be posted after issue reproduction. Link to the comment where you posted your reproduction, plus the text of that comment.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5810038952
+
+Environment: Python 3.14, rank-bm25 library, running in /pathreview-ai301-fa26-s3 repo
+
+Steps to reproduce:
+
+```python
+from rag.retriever.keyword_search import KeywordSearcher
+
+searcher = KeywordSearcher()
+searcher.index([])  # Pass empty chunk list
+```
+
+Expected: The index() method should handle empty input gracefully (no exception), allowing subsequent search() calls to return [] as documented by the search() method's existing empty-check at line 38-40.
+
+Actual: ZeroDivisionError is raised in BM25Okapi initialization:
+
+```
+Traceback (most recent call last):
+  File ".../keyword_search.py", line 25, in index
+    self.bm25 = BM25Okapi(tokenized_corpus)
+  File ".../rank_bm25.py", line 83, in __init__
+    super().__init__(corpus, tokenizer)
+  File ".../rank_bm25.py", line 27, in __init__
+    nd = self._initialize(corpus)
+  File ".../rank_bm25.py", line 52, in _initialize
+    self.avgdl = num_doc / self.corpus_size
+ZeroDivisionError: division by zero
+```
+
+Root cause: BM25Okapi library divides by corpus_size (which is 0 when corpus is empty) when initializing. The KeywordSearcher.index() method should guard against empty input before passing to BM25Okapi, matching the defensive pattern already in place in search() method (lines 38-40).
+
+Test evidence: The xfail test at tests/unit/test_keyword_search.py:134-143 expects index([]) to succeed and allow search() to return [].
 
 ## Eval iterations
 
