@@ -15,17 +15,15 @@ label is not graded.
 
 **GitHub username**
 
-[Your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comment upstream is identified by this name, and it is
-the only thing that ties it to you. Several students may plan the same
-house issue, so this is what keeps their comments off your score and
-yours off theirs.]
+ajwadtahmid
 
 **Plan comment**
 
-[Link to the comment where you posted your plan on the issue. Use the comment's own
-permalink. **Then paste the text of that comment underneath the link** — the pasted text is
-what this field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5810876543
+
+I dug into the root cause: BM25Okapi divides by corpus_size (0 when empty) during initialization, causing the ZeroDivisionError. The `search()` method already has a defensive guard for empty indexes (returns []), so the fix is to add the same pattern to `index()`.
+
+Plan: Add an empty-check guard to `KeywordSearcher.index()` that returns early if chunks is empty, matching the defensive behavior of `search()`. Remove the xfail marker from the existing test. I'll verify all tests pass including the empty-index case.
 
 ---
 
@@ -33,15 +31,50 @@ what this field is graded on, so copy across what you actually posted.]
 
 **Branch**
 
-[The name of the branch you built the change on, exactly as it appears in your fork. The
-naming shape is a type prefix, then the issue number, then a short description. **The issue
-number in the branch name must be the number of the issue you claimed** — a name carrying
-any other number does not satisfy this field.]
+fix/68-empty-index-guard
 
 **Evidence**
 
-[Your Unit 2 reproduction steps re-run against the built change: the before, then the
-after. Paste both, including the commands you ran and their output.]
+Before fix - reproduction fails with ZeroDivisionError:
+```bash
+$ cd /home/ajwad/Documents/pathreview-ai301-fa26-s3
+$ python3 -c "
+from rag.retriever.keyword_search import KeywordSearcher
+searcher = KeywordSearcher()
+searcher.index([])
+"
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+    searcher.index([])
+  File "/home/ajwad/Documents/pathreview-ai301-fa26-s3/rag/retriever/keyword_search.py", line 25, in index
+    self.bm25 = BM25Okapi(tokenized_corpus)
+  File "...rank_bm25.py", line 52, in _initialize
+    self.avgdl = num_doc / self.corpus_size
+ZeroDivisionError: division by zero
+```
+
+After fix - reproduction succeeds and test passes:
+```bash
+$ python3 -c "
+from rag.retriever.keyword_search import KeywordSearcher
+searcher = KeywordSearcher()
+searcher.index([])
+results = searcher.search('test', top_k=10)
+print(f'Success: index([]) handled, search returned {results}')
+"
+2026-09-25 07:30:48 [warning  ] keyword_index_empty
+2026-09-25 07:30:48 [warning  ] keyword_search_empty_index
+Success: index([]) handled, search returned []
+
+$ python3 -m pytest tests/unit/test_keyword_search.py -v
+============================= test session starts ==============================
+...
+tests/unit/test_keyword_search.py::TestKeywordSearcher::test_empty_index PASSED [100%]
+...
+============================== 17 passed in 0.10s =======================================
+```
+
+All 17 tests pass, including the previously xfail test_empty_index.
 
 ## Eval iterations
 
@@ -50,28 +83,21 @@ fields.
 
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+18/20 (first full run, final submitted run)
 
 **Package analysis**
 
-[Pick one scored package (`pkg-01` through `pkg-20` — the four `calib-` packages are never
-scored). Name it by id, say what your rubric decided and what the gold label said, and
-explain why your rubric read it that way.]
+pkg-13 (microsoft/terminal#20370). Gold label: accept (clear-accept). My rubric: reject (failed: Plan is executable). Reason: My rubric rejected this technically sophisticated plan for Windows Terminal because the Approach section names methods (`EraseInDisplay`, the scrollback branch) without including full file paths (`src/adapter/AdaptDispatch.cpp`). The plan is actually highly executable—it identifies the exact method and branch, describes three specific implementation steps (re-anchor viewport, invalidate region, add test), and the Test plan directly mirrors the repro evidence. The gold correctly accepts it: a maintainer familiar with the codebase can start this work immediately. My check was too strict in requiring explicit file paths when the area is unambiguously identified by method name and context.
 
 **Check rationale**
 
-[Quote one check from the `rubric.md` you uploaded to `tools/plan-check/`, exactly as it reads now.
-Then say why it reads that way — what you revised to get there, or what you rejected in
-favour of it.]
+From rubric.md: "Plan is executable | Plan's Files, Approach, and Test plan sections | A stranger could start executing this plan without asking the author anything: files are named exactly, approach lists concrete steps in order, test plan names what will be observed (output changes, exit code changes, test passes)."
+
+This check was designed to reject plans that are vague or leave critical details to the implementer's imagination. However, I set it to require "files are named exactly" with full paths, which is too strict for projects where method names and areas unambiguously point to locations (like EraseInDisplay in Terminal). The intent—catchable without asking the author—is met by pkg-13's specific method and branch identification, so the strictness on file paths was unnecessary. I kept the check as-is because the rubric still catches genuinely unbuildable plans (pkg-17, pkg-18 reject correctly for being unspecific), and the 18/20 agreement indicates the check works well overall. This is a boundary case where deep domain knowledge lets a "stranger" (a Windows Terminal contributor) execute without asking.
 
 **Trade-offs**
 
-[Every check gives something up. Any one of these is a complete answer: a package whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+The "Plan is executable" check trades off strict file-path requirements against context-awareness: it rejects some plans that experienced contributors can follow (like pkg-13, which a Terminal dev immediately understands) but correctly rejects plans that are vague to everyone (pkg-17 "look at the X module" with no method name, pkg-18 "refactor the caching" with no scope). The check thus overshoots on clarity but doesn't undershoot on executability for the actual audience (repo contributors). This is acceptable at the 18/20 pass bar; a revision would add "OR method/area unambiguously named in context" to the pass condition, but that complicates the rubric for minimal gain since it's already passing.
 
 ---
 
