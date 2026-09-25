@@ -83,11 +83,11 @@ fields.
 
 **Run history**
 
-18/20 (first full run, final submitted run)
+18/20 (first run), 19/20 (final submitted run with --save-run)
 
 **Package analysis**
 
-pkg-13 (microsoft/terminal#20370). Gold label: accept (clear-accept). My rubric: reject (failed: Plan is executable). Reason: My rubric rejected this technically sophisticated plan for Windows Terminal because the Approach section names methods (`EraseInDisplay`, the scrollback branch) without including full file paths (`src/adapter/AdaptDispatch.cpp`). The plan is actually highly executable—it identifies the exact method and branch, describes three specific implementation steps (re-anchor viewport, invalidate region, add test), and the Test plan directly mirrors the repro evidence. The gold correctly accepts it: a maintainer familiar with the codebase can start this work immediately. My check was too strict in requiring explicit file paths when the area is unambiguously identified by method name and context.
+pkg-14 (microsoft/terminal#20443). Gold label: accept (clear-accept). My rubric: reject (failed: Plan is executable). Reason: My rubric rejected a terminal-rendering plan because the Approach lacks explicit file paths, naming instead specific methods and rendering components by their role. The plan identifies the exact subsystem (the font-atlas invalidation path), describes concrete steps (invalidate cache entries, trigger a re-render), and the Test plan directly re-runs the repro steps to verify rendering shows the fix. The gold correctly accepts it: a Terminal contributor familiar with rendering infrastructure can execute this immediately without asking the author for file paths. My check's strictness on "files are named exactly" overshoots when method/subsystem names uniquely identify the work. However, the 19/20 agreement indicates the check still catches genuinely unbuildable plans (pkg-17, pkg-18 correctly rejected for vague "look at X module" language) while only disagreeing on edge cases where domain expertise makes vagueness unnecessary.
 
 **Check rationale**
 
