@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/voice-guard/check_voice.py\"",
+            "timeout": 180,
+            "statusMessage": "voice-guard: holding outgoing words against your voice guide"
+          }
+        ]
+      }
+    ]
+  }
+}

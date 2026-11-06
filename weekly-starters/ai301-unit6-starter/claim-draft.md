@@ -1,0 +1,1 @@
+I'd like to take this one. I'll read the id from the root's `data-composition-id` in `renderShots()` instead of hardcoding `film`, and add a test that `films/roof/index.html` matches. First step is reproducing the failure on `roof`; I'll report back here within two days, or release the issue if I can't finish it.
